@@ -21,238 +21,321 @@ app.get("/", (req, res) => {
   res.send("Welcome TO the Travel Guru!");
 });
 
-async function run() {
-  try {
-    await client.connect();
-    const db = client.db("travelGuru");
-    const packagesCollection = db.collection("packages");
-    const bookingCollection = db.collection("bookings");
-    const userCollection = db.collection("users");
-    const blogCollection = db.collection("blogs");
-    // Define API endpoints for packages
-    app.post("/packages", async (req, res) => {
-      const newPackage = { ...req.body, _id: new ObjectId() };
-      const result = await packagesCollection.insertOne(newPackage);
-      res.send(result);
-    });
+let collectionsPromise;
 
-    app.get("/packages", async (req, res) => {
-      const cursor = packagesCollection.find({});
-      const packages = await cursor.toArray();
-      res.send(packages);
-    });
-
-    app.get("/packages/:id", async (req, res) => {
-      const id = req.params.id;
-
-      if (!ObjectId.isValid(id)) {
-        return res.status(400).send({ message: "Invalid id" });
-      }
-
-      const result = await packagesCollection.findOne({
-        _id: new ObjectId(id),
+async function getCollections() {
+  if (!collectionsPromise) {
+    collectionsPromise = client
+      .connect()
+      .then(async () => {
+        const db = client.db("travelGuru");
+        await client.db("admin").command({ ping: 1 });
+        console.log(
+          "Pinged your deployment. You successfully connected to MongoDB!",
+        );
+        return {
+          packagesCollection: db.collection("packages"),
+          bookingCollection: db.collection("bookings"),
+          userCollection: db.collection("users"),
+          blogCollection: db.collection("blogs"),
+        };
+      })
+      .catch((error) => {
+        collectionsPromise = null;
+        throw error;
       });
-      res.send(result);
-    });
-
-    app.delete("/packages/:id", async (req, res) => {
-      const id = req.params.id;
-
-      if (!ObjectId.isValid(id)) {
-        return res.status(400).send({ message: "Invalid id" });
-      }
-
-      const result = await packagesCollection.deleteOne({
-        _id: new ObjectId(id),
-      });
-      res.send(result);
-    });
-
-    app.patch("/packages/:id", async (req, res) => {
-      const id = req.params.id;
-      const updatedPackage = req.body;
-
-      if (!ObjectId.isValid(id)) {
-        return res.status(400).send({ message: "Invalid id" });
-      }
-
-      const result = await packagesCollection.updateOne(
-        { _id: new ObjectId(id) },
-        { $set: updatedPackage },
-      );
-      res.send(result);
-    });
-
-    //api for booking
-    app.post("/bookings", async (req, res) => {
-      const newBooking = { ...req.body, _id: new ObjectId() };
-      const result = await bookingCollection.insertOne(newBooking);
-      res.send(result);
-    });
-
-    app.get("/bookings", async (req, res) => {
-      const cursor = bookingCollection.find({});
-      const bookings = await cursor.toArray();
-      res.send(bookings);
-    });
-
-    app.get("/bookings/:id", async (req, res) => {
-      const id = req.params.id;
-
-      if (!ObjectId.isValid(id)) {
-        return res.status(400).send({ message: "Invalid id" });
-      }
-
-      const result = await bookingCollection.findOne({
-        _id: new ObjectId(id),
-      });
-      res.send(result);
-    });
-
-    app.delete("/bookings/:id", async (req, res) => {
-      const id = req.params.id;
-
-      if (!ObjectId.isValid(id)) {
-        return res.status(400).send({ message: "Invalid id" });
-      }
-
-      const result = await bookingCollection.deleteOne({
-        _id: new ObjectId(id),
-      });
-      res.send(result);
-    });
-
-    app.patch("/bookings/:id", async (req, res) => {
-      const id = req.params.id;
-      const updatedBooking = req.body;
-
-      if (!ObjectId.isValid(id)) {
-        return res.status(400).send({ message: "Invalid id" });
-      }
-
-      const result = await bookingCollection.updateOne(
-        { _id: new ObjectId(id) },
-        { $set: updatedBooking },
-      );
-      res.send(result);
-    });
-    //api for user
-    app.post("/users", async (req, res) => {
-      const newUser = { ...req.body, _id: new ObjectId() };
-      const result = await userCollection.insertOne(newUser);
-      res.send(result);
-    });
-
-    app.get("/users", async (req, res) => {
-      const cursor = userCollection.find({});
-      const users = await cursor.toArray();
-      res.send(users);
-    });
-
-    app.get("/users/:id", async (req, res) => {
-      const id = req.params.id;
-
-      if (!ObjectId.isValid(id)) {
-        return res.status(400).send({ message: "Invalid id" });
-      }
-
-      const result = await userCollection.findOne({
-        _id: new ObjectId(id),
-      });
-      res.send(result);
-    });
-
-    app.delete("/users/:id", async (req, res) => {
-      const id = req.params.id;
-
-      if (!ObjectId.isValid(id)) {
-        return res.status(400).send({ message: "Invalid id" });
-      }
-
-      const result = await userCollection.deleteOne({
-        _id: new ObjectId(id),
-      });
-      res.send(result);
-    });
-
-    app.patch("/users/:id", async (req, res) => {
-      const id = req.params.id;
-      const updatedUser = req.body;
-
-      if (!ObjectId.isValid(id)) {
-        return res.status(400).send({ message: "Invalid id" });
-      }
-
-      const result = await userCollection.updateOne(
-        { _id: new ObjectId(id) },
-        { $set: updatedUser },
-      );
-      res.send(result);
-    });
-    //api for blogs
-    app.post("/blogs", async (req, res) => {
-      const newBlog = { ...req.body, _id: new ObjectId() };
-      const result = await blogCollection.insertOne(newBlog);
-      res.send(result);
-    });
-
-    app.get("/blogs", async (req, res) => {
-      const cursor = blogCollection.find({});
-      const blogs = await cursor.toArray();
-      res.send(blogs);
-    });
-
-    app.get("/blogs/:id", async (req, res) => {
-      const id = req.params.id;
-
-      if (!ObjectId.isValid(id)) {
-        return res.status(400).send({ message: "Invalid id" });
-      }
-
-      const result = await blogCollection.findOne({
-        _id: new ObjectId(id),
-      });
-      res.send(result);
-    });
-
-    app.delete("/blogs/:id", async (req, res) => {
-      const id = req.params.id;
-
-      if (!ObjectId.isValid(id)) {
-        return res.status(400).send({ message: "Invalid id" });
-      }
-
-      const result = await blogCollection.deleteOne({
-        _id: new ObjectId(id),
-      });
-      res.send(result);
-    });
-
-    app.patch("/blogs/:id", async (req, res) => {
-      const id = req.params.id;
-      const updatedBlog = req.body;
-
-      if (!ObjectId.isValid(id)) {
-        return res.status(400).send({ message: "Invalid id" });
-      }
-
-      const result = await blogCollection.updateOne(
-        { _id: new ObjectId(id) },
-        { $set: updatedBlog },
-      );
-      res.send(result);
-    });
-
-    //End of API endpoints for packages
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!",
-    );
-  } finally {
-    // await client.close();
   }
+
+  return collectionsPromise;
 }
-run().catch(console.dir);
+
+const withCollections = (handler) => async (req, res) => {
+  try {
+    const collections = await getCollections();
+    await handler(req, res, collections);
+  } catch (error) {
+    console.error(error);
+    res.status(503).send({ message: "Database unavailable" });
+  }
+};
+
+// Define API endpoints for packages
+app.post(
+  "/packages",
+  withCollections(async (req, res, { packagesCollection }) => {
+    const newPackage = { ...req.body, _id: new ObjectId() };
+    const result = await packagesCollection.insertOne(newPackage);
+    res.send(result);
+  }),
+);
+
+app.get(
+  "/packages",
+  withCollections(async (req, res, { packagesCollection }) => {
+    const cursor = packagesCollection.find({});
+    const packages = await cursor.toArray();
+    res.send(packages);
+  }),
+);
+
+app.get(
+  "/packages/:id",
+  withCollections(async (req, res, { packagesCollection }) => {
+    const id = req.params.id;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid id" });
+    }
+
+    const result = await packagesCollection.findOne({
+      _id: new ObjectId(id),
+    });
+    res.send(result);
+  }),
+);
+
+app.delete(
+  "/packages/:id",
+  withCollections(async (req, res, { packagesCollection }) => {
+    const id = req.params.id;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid id" });
+    }
+
+    const result = await packagesCollection.deleteOne({
+      _id: new ObjectId(id),
+    });
+    res.send(result);
+  }),
+);
+
+app.patch(
+  "/packages/:id",
+  withCollections(async (req, res, { packagesCollection }) => {
+    const id = req.params.id;
+    const updatedPackage = req.body;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid id" });
+    }
+
+    const result = await packagesCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updatedPackage },
+    );
+    res.send(result);
+  }),
+);
+
+//api for booking
+app.post(
+  "/bookings",
+  withCollections(async (req, res, { bookingCollection }) => {
+    const newBooking = { ...req.body, _id: new ObjectId() };
+    const result = await bookingCollection.insertOne(newBooking);
+    res.send(result);
+  }),
+);
+
+app.get(
+  "/bookings",
+  withCollections(async (req, res, { bookingCollection }) => {
+    const cursor = bookingCollection.find({});
+    const bookings = await cursor.toArray();
+    res.send(bookings);
+  }),
+);
+
+app.get(
+  "/bookings/:id",
+  withCollections(async (req, res, { bookingCollection }) => {
+    const id = req.params.id;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid id" });
+    }
+
+    const result = await bookingCollection.findOne({
+      _id: new ObjectId(id),
+    });
+    res.send(result);
+  }),
+);
+
+app.delete(
+  "/bookings/:id",
+  withCollections(async (req, res, { bookingCollection }) => {
+    const id = req.params.id;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid id" });
+    }
+
+    const result = await bookingCollection.deleteOne({
+      _id: new ObjectId(id),
+    });
+    res.send(result);
+  }),
+);
+
+app.patch(
+  "/bookings/:id",
+  withCollections(async (req, res, { bookingCollection }) => {
+    const id = req.params.id;
+    const updatedBooking = req.body;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid id" });
+    }
+
+    const result = await bookingCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updatedBooking },
+    );
+    res.send(result);
+  }),
+);
+
+//api for user
+app.post(
+  "/users",
+  withCollections(async (req, res, { userCollection }) => {
+    const newUser = { ...req.body, _id: new ObjectId() };
+    const result = await userCollection.insertOne(newUser);
+    res.send(result);
+  }),
+);
+
+app.get(
+  "/users",
+  withCollections(async (req, res, { userCollection }) => {
+    const cursor = userCollection.find({});
+    const users = await cursor.toArray();
+    res.send(users);
+  }),
+);
+
+app.get(
+  "/users/:id",
+  withCollections(async (req, res, { userCollection }) => {
+    const id = req.params.id;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid id" });
+    }
+
+    const result = await userCollection.findOne({
+      _id: new ObjectId(id),
+    });
+    res.send(result);
+  }),
+);
+
+app.delete(
+  "/users/:id",
+  withCollections(async (req, res, { userCollection }) => {
+    const id = req.params.id;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid id" });
+    }
+
+    const result = await userCollection.deleteOne({
+      _id: new ObjectId(id),
+    });
+    res.send(result);
+  }),
+);
+
+app.patch(
+  "/users/:id",
+  withCollections(async (req, res, { userCollection }) => {
+    const id = req.params.id;
+    const updatedUser = req.body;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid id" });
+    }
+
+    const result = await userCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updatedUser },
+    );
+    res.send(result);
+  }),
+);
+
+//api for blogs
+app.post(
+  "/blogs",
+  withCollections(async (req, res, { blogCollection }) => {
+    const newBlog = { ...req.body, _id: new ObjectId() };
+    const result = await blogCollection.insertOne(newBlog);
+    res.send(result);
+  }),
+);
+
+app.get(
+  "/blogs",
+  withCollections(async (req, res, { blogCollection }) => {
+    const cursor = blogCollection.find({});
+    const blogs = await cursor.toArray();
+    res.send(blogs);
+  }),
+);
+
+app.get(
+  "/blogs/:id",
+  withCollections(async (req, res, { blogCollection }) => {
+    const id = req.params.id;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid id" });
+    }
+
+    const result = await blogCollection.findOne({
+      _id: new ObjectId(id),
+    });
+    res.send(result);
+  }),
+);
+
+app.delete(
+  "/blogs/:id",
+  withCollections(async (req, res, { blogCollection }) => {
+    const id = req.params.id;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid id" });
+    }
+
+    const result = await blogCollection.deleteOne({
+      _id: new ObjectId(id),
+    });
+    res.send(result);
+  }),
+);
+
+app.patch(
+  "/blogs/:id",
+  withCollections(async (req, res, { blogCollection }) => {
+    const id = req.params.id;
+    const updatedBlog = req.body;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid id" });
+    }
+
+    const result = await blogCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updatedBlog },
+    );
+    res.send(result);
+  }),
+);
+
+client.connect().catch(console.dir);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
