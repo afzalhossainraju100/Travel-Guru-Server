@@ -28,6 +28,7 @@ async function run() {
     const packagesCollection = db.collection("packages");
     const bookingCollection = db.collection("bookings");
     const userCollection = db.collection("users");
+    const blogCollection = db.collection("blogs");
     // Define API endpoints for packages
     app.post("/packages", async (req, res) => {
       const newPackage = { ...req.body, _id: new ObjectId() };
@@ -185,6 +186,59 @@ async function run() {
       const result = await userCollection.updateOne(
         { _id: new ObjectId(id) },
         { $set: updatedUser },
+      );
+      res.send(result);
+    });
+    //api for blogs
+    app.post("/blogs", async (req, res) => {
+      const newBlog = { ...req.body, _id: new ObjectId() };
+      const result = await blogCollection.insertOne(newBlog);
+      res.send(result);
+    });
+
+    app.get("/blogs", async (req, res) => {
+      const cursor = blogCollection.find({});
+      const blogs = await cursor.toArray();
+      res.send(blogs);
+    });
+
+    app.get("/blogs/:id", async (req, res) => {
+      const id = req.params.id;
+
+      if (!ObjectId.isValid(id)) {
+        return res.status(400).send({ message: "Invalid id" });
+      }
+
+      const result = await blogCollection.findOne({
+        _id: new ObjectId(id),
+      });
+      res.send(result);
+    });
+
+    app.delete("/blogs/:id", async (req, res) => {
+      const id = req.params.id;
+
+      if (!ObjectId.isValid(id)) {
+        return res.status(400).send({ message: "Invalid id" });
+      }
+
+      const result = await blogCollection.deleteOne({
+        _id: new ObjectId(id),
+      });
+      res.send(result);
+    });
+
+    app.patch("/blogs/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatedBlog = req.body;
+
+      if (!ObjectId.isValid(id)) {
+        return res.status(400).send({ message: "Invalid id" });
+      }
+
+      const result = await blogCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: updatedBlog },
       );
       res.send(result);
     });
