@@ -265,6 +265,24 @@ app.patch(
     res.send(result);
   }),
 );
+app.put(
+  "/users/:id",
+  withCollections(async (req, res, { userCollection }) => {
+    const id = req.params.id;
+    const updatedUser = req.body;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid id" });
+    }
+
+    const result = await userCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updatedUser },
+      { upsert: true },
+    );
+    res.send(result);
+  }),
+);
 
 //api for blogs
 app.post(
