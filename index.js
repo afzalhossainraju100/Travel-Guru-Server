@@ -16,7 +16,7 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
-
+// Verify Firebase Admin configuration at startup
 app.get("/", (req, res) => {
   res.send("Welcome TO the Travel Guru!");
 });
@@ -81,6 +81,7 @@ app.get(
 app.get(
   "/packages/:id",
   withCollections(async (req, res, { packagesCollection }) => {
+    //console.log('headers', req.headers);
     const id = req.params.id;
 
     if (!ObjectId.isValid(id)) {
