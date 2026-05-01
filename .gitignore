@@ -1,18 +1,29 @@
+# Dependencies
 node_modules/
-dist/
-build/
+
+# Environment variables (DO NOT commit sensitive credentials)
 .env
-.env.*
-!.env.example
+.env.local
+.env.*.local
+
+# Firebase Admin Keys (sensitive - DO NOT commit)
+*firebase-adminsdk*.json
+*service-account*.json
+
+# OS files
 .DS_Store
+
+# Logs
+npm-debug.log*
 *.log
+
+# IDE and Editor files
 .idea/
 .vscode/
-coverage/
-*.tsbuildinfo
-*.bak
-*.tmp
 *.swp
 *.swo
-*.zip
-*.tar.gz
+*.bak
+
+# Temporary files
+*.tmp
+*.temp

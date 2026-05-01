@@ -23,13 +23,18 @@ app.get("/", (req, res) => {
 
 let collectionsPromise;
 
+// email
+// "admin@travelagency.com"
+// password
+// "$2b$10$hashed_password_here"
+
 async function getCollections() {
   if (!collectionsPromise) {
     collectionsPromise = client
       .connect()
       .then(async () => {
         const db = client.db("travelGuru");
-        await client.db("admin").command({ ping: 1 });
+        // await client.db("admin").command({ ping: 1 });
         console.log(
           "Pinged your deployment. You successfully connected to MongoDB!",
         );
@@ -326,7 +331,7 @@ app.delete(
     const id = req.params.id;
 
     if (!ObjectId.isValid(id)) {
-      return res.status(400).send({ message: "Invalid id" });
+      return res.status(400).send({ message:"Invalid id"  });
     }
 
     const result = await blogCollection.deleteOne({
