@@ -22,18 +22,15 @@ app.use(cors());
 app.use(express.json());
 
 const uri = process.env.MONGODB_URI;
-if (!uri) {
-  throw new Error(
-    "MONGODB_URI is missing. Check your .env file or deployment variables.",
-  );
-}
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-});
+const client = uri
+  ? new MongoClient(uri, {
+      serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+      },
+    })
+  : null;
 // Verify Firebase Admin configuration at startup
 app.get("/", (req, res) => {
   res.send("Welcome TO the Travel Guru!");
@@ -47,6 +44,12 @@ let collectionsPromise;
 // "$2b$10$hashed_password_here"
 
 async function getCollections() {
+  if (!client) {
+    throw new Error(
+      "MONGODB_URI is missing. Add it to your local .env and Vercel Environment Variables.",
+    );
+  }
+
   if (!collectionsPromise) {
     collectionsPromise = client
       .connect()
