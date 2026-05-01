@@ -7,7 +7,16 @@ const port = process.env.PORT || 3000;
 
 const { getFirebaseAdminApp } = require("./config/firebaseAdmin");
 
-getFirebaseAdminApp();
+try {
+  // Initialize Firebase Admin, but do not let initialization errors crash the module
+  // in serverless environments. Missing/invalid env vars will be logged instead.
+  getFirebaseAdminApp();
+} catch (err) {
+  console.error(
+    "Firebase initialization warning:",
+    err && err.message ? err.message : err,
+  );
+}
 
 app.use(cors());
 app.use(express.json());
