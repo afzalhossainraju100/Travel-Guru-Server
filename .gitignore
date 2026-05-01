@@ -7,6 +7,7 @@ node_modules/
 .env.*.local
 
 # Firebase Admin Keys (sensitive - DO NOT commit)
+travel-guru-auth-projec-f8d6b-firebase-adminsdk-fb.json
 *firebase-adminsdk*.json
 *service-account*.json
 
@@ -27,3 +28,4 @@ npm-debug.log*
 # Temporary files
 *.tmp
 *.temp
+.vercel

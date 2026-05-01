@@ -1,14 +1,23 @@
 const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 3000;
+
+const { getFirebaseAdminApp } = require("./config/firebaseAdmin");
+
+getFirebaseAdminApp();
 
 app.use(cors());
 app.use(express.json());
 
-const uri =
-  "mongodb+srv://travelGuru:o7StOuUYVwd4bkHK@cluster0.1ezipje.mongodb.net/?appName=Cluster0";
+const uri = process.env.MONGODB_URI;
+if (!uri) {
+  throw new Error(
+    "MONGODB_URI is missing. Check your .env file or deployment variables.",
+  );
+}
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -331,7 +340,7 @@ app.delete(
     const id = req.params.id;
 
     if (!ObjectId.isValid(id)) {
-      return res.status(400).send({ message:"Invalid id"  });
+      return res.status(400).send({ message: "Invalid id" });
     }
 
     const result = await blogCollection.deleteOne({
@@ -359,8 +368,10 @@ app.patch(
   }),
 );
 
-client.connect().catch(console.dir);
+if (require.main === module && !process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`);
+  });
+}
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
+module.exports = app;
